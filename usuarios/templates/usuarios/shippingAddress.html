@@ -1,0 +1,13 @@
+{% extends 'base.html'%}
+
+{% block content%}
+
+<form action="" method="post">
+    {% csrf_token %}
+    {{ shipping_form.as_p }}
+    <button type="submit">
+        Register Address
+    </button>
+</form>
+
+{% endblock %}

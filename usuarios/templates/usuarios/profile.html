@@ -1,0 +1,58 @@
+{% extends 'base.html'%}
+
+
+
+
+
+{% block content %}
+<h2>Perfil</h2>
+
+<!-- Información del usuario -->
+<section>
+  <h3>Datos de Usuario</h3>
+  <p><strong>Username:</strong> {{ user.username }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+</section>
+
+<!-- Información del cliente -->
+{% if customer %}
+<section>
+  <h3>Información del Cliente</h3>
+  <p><strong>Nombre:</strong> {{ customer.name }}</p>
+</section>
+
+<!-- Direcciones registradas -->
+{% if shipping_addresses %}
+<section>
+  <h3>Direcciones de Envío</h3>
+  <ul>
+    {% for address in shipping_addresses %}
+      <li>
+        {{ address.address }}, {{ address.city }}, {{ address.state }} - {{ address.zipcode }}
+        <br><small>Registrada el {{ address.date_added }}</small>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No hay direcciones de envío registradas.</p>
+{% endif %}
+{% else %}
+  <p>No se ha creado un perfil de cliente aún.</p>
+{% endif %}
+
+
+
+<a href="{% url 'shipping'%}"> Añadir direccion </a>   
+
+{% endblock %}
+
+
+{% block logout %}
+
+<form method="POST" action="{% url 'logout' %}">
+  {% csrf_token %}
+  <button type="submit">Cerrar sesión</button>
+</form>
+
+{% endblock %}
+

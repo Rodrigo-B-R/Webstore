@@ -1,0 +1,20 @@
+# Entorno virtual
+venv/
+.env/
+*.pyc
+__pycache__/
+
+# Base de datos local
+db.sqlite3
+
+# Archivos de usuario y sistema
+*.log
+.DS_Store
+
+# Archivos de Django
+/staticfiles/
+/media/
+
+# Configuración de editores
+.idea/
+.vscode/
