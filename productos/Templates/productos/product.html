@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
-  <h2>{{ product.name }}</h2>
-  <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 400px;">
-  <p><strong>Precio:</strong> $ {{ product.price }}</p>
-  <p>{{ product.description }}</p>
+  <div class="container mt-4">
+    <h2>{{ product.name }}</h2>
 
-  {% csrf_token %}
-  {{}}
+    {% if product.images.first %}
+      <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 400px;">
+    {% else %}
+      <p>No hay imagen disponible.</p>
+    {% endif %}
+
+    <p><strong>Precio:</strong> ${{ product.price }}</p>
+    <p>{{ product.description }}</p>
+
+    <form action="{% url 'product' product.id %}" method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <button type="submit" class="btn btn-primary">Añadir al carrito</button>
+    </form>
+  </div>
 {% endblock %}
