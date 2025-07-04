@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator
+
 
 # Create your models here.
 
@@ -20,6 +22,7 @@ class Order(models.Model):
         return sum([item.get_total for item in self.orderitem_set.all()]) 
         #itera por los objetos orderitem y suma sus precios
     
+    #numero de items en la orden 
     @property
     def get_cart_items(self):
         return sum([item.quantity for item in self.orderitem_set.all()])
@@ -32,10 +35,12 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     #atributos
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     date_added = models.DateTimeField(auto_now_add=True)
 
     #metodos
     @property
     def get_total(self):
         return self.product.price * self.quantity
+    
+ 

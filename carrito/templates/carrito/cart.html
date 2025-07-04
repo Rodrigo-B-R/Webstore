@@ -1,6 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">🛒 Carrito de Compras</h2>
 
-<h1> Añadido al carrito </h1>
+  {% if items %}
+    <div class="row gy-3">
+      {% for item in items %}
+        <div class="col-md-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ item.product.name }}</h5>
+              <p class="card-text">
+                Precio: <strong>${{ item.product.price }}</strong><br>
+                Cantidad: <strong>{{ item.quantity }}</strong><br>
+                Subtotal: <strong>${{ item.get_total }}</strong>
+              </p>
+              
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-4 p-4 bg-light rounded shadow-sm">
+      <h4 class="mb-3">Resumen del Pedido</h4>
+      <p><strong>Total:</strong> ${{ order.get_cart_total }}</p>
+      <p><strong>Fecha de creación:</strong> {{ order.date_ordered|date:"d M Y" }}</p>
+
+      <a href="#" class="btn btn-success mt-3">Proceder al pago</a>
+    </div>
+  {% else %}
+    <div class="alert alert-info mt-4">Tu carrito está vacío.</div>
+  {% endif %}
+</div>
 {% endblock %}

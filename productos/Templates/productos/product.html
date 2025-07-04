@@ -1,23 +1,61 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h2>{{ product.name }}</h2>
+<div class="container-fluid mt-5">
+  <div class="row">
 
-    {% if product.images.first %}
-      <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" style="width: 400px;">
-    {% else %}
-      <p>No hay imagen disponible.</p>
-    {% endif %}
+    <!-- Miniaturas a la izquierda -->
+    <div class="col-md-1 d-flex flex-column gap-2"> 
+      <div class="card border-0 rounded-0">
+        <div class="card-img-top"> 
+          {% for image in product.images.all %}
+            <img src="{{ image.image.url }}" class="img-thumbnail" alt="Miniatura {{ forloop.counter }}">
+          {% endfor %}
+          
+        </div>
+      </div>
+    </div>
 
-    <p><strong>Precio:</strong> ${{ product.price }}</p>
-    <p>{{ product.description }}</p>
+    <!-- Imagen principal al centro -->
+    <div class="col-md-6 text-center">
+      <div class="card border-0 rounded-0">
+        <div class="card-img-top">
+          {% if product.images.first %}
+            <img src="{{ product.images.first.image.url }}" class="img-fluid" alt="Imagen principal">
+          {% else %}
+            <img src="{% static 'imgs/placeholder.jpg'%}" class="img-fluid" alt="Sin imagen">
+          {% endif %}
 
-    <form action="{% url 'product' product.id %}" method="POST">
-      {% csrf_token %}
-      {{ form.as_p }}
+        </div>
+      </div>
+    </div>
+    
 
-      <button type="submit" class="btn btn-primary">Añadir al carrito</button>
-    </form>
+
+    
+
+    <!-- Información del producto -->
+    <div class="col-md-4">
+      <h3 class="fw-bold">{{ product.name }}</h3>
+      <p class="text-muted fs-5">$ {{ product.price }}</p>
+      <p>{{ product.description }}</p>
+
+      <!-- Formulario de añadir al carrito -->
+      <form method="post" action="{% url 'product' product.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.as_p }}
+        </div>
+
+        {% if message %}
+          <div class="alert alert-danger">{{ message }}</div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-dark w-100">Add to Cart</button>
+      </form>
+    </div>
+
   </div>
+</div>
 {% endblock %}
