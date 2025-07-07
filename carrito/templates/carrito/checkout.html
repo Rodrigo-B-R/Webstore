@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Resumen de tu orden</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="list-group mb-4">
+                {% for item in order_items %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ item.product.name }}</h5>
+                        <p class="mb-1">Cantidad: {{ item.quantity }}</p>
+                        <small>Subtotal: ${{ item.get_total }}</small>
+                    </div>
+                    {% if item.product.images.first %}
+                        <img src="{{ item.product.images.first.image.url }}" class="card-img-top img-fluid"  style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="{% static 'imgs/placeholder.jpg' %}" class="card-img-top img-fluid" style="height: 200px; object-fit: contain;"  alt="Sin imagen">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <h4>Total: ${{ order.get_cart_total }}</h4>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Dirección de envío</h5>
+                </div>
+                <div class="card-body">
+                    <form id="shippingForm">
+                        <div class="form-group mb-3">
+                            <label for="shippingSelect">Selecciona una dirección guardada:</label>
+                            <select class="form-select" id="shippingSelect">
+                                {% for address in shipping_addresses %}
+                                <option value="{{ address.id }}">
+                                    {{ address.address }}, {{ address.city }} ({{ address.zipcode }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Proceder al pago</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

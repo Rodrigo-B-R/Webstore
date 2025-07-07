@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+import uuid
 
 
 # Create your models here.
@@ -13,8 +14,13 @@ class Order(models.Model):
     complete= models.BooleanField(default=False)
     transaction_id= models.CharField(max_length=100 , null=True)
 
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transaction_id= str(uuid.uuid4())
+
     def __str__(self):
-        return f"Orden #{self.id} - {self.customer.name if self.customer else 'Invitado'}"
+        return f"Orden #{self.id} - {self.customer.name if self.customer else 'Invitado'}"  
     
     #metodos
     @property

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 import os
 from .models import Product
 from django.utils import timezone
-
+import uuid
 
 #Importo los modelos y forms de carrito
 from carrito.forms import OrderItemForm
@@ -33,6 +33,7 @@ def product_view(request,id):
 
     add_to_cart_form = OrderItemForm()
 
+    #si recibimos una peticion para añadir al carrito
     if request.method == 'POST':
 
         add_to_cart_form = OrderItemForm(request.POST)
@@ -45,6 +46,7 @@ def product_view(request,id):
 
             # Obtener o crear una orden activa para el usuario
             order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            
 
 
             # Buscar si ya existe un OrderItem con ese producto en la orden
@@ -53,10 +55,10 @@ def product_view(request,id):
             if existing_item:
                 # Sumar cantidades si ya existe ese producto
                 existing_item.quantity += order_item.quantity
-
+                #checa si hay stock suficiente
                 if existing_item.quantity <= product_quantity:
                     existing_item.save()
-                    return redirect('add_to_cart')
+                    return redirect('cart')
                 else: 
                     context = {
                                 'product': product,
@@ -68,7 +70,7 @@ def product_view(request,id):
                 if order_item.quantity <= product_quantity:
                     order_item.order = order
                     order_item.save()
-                    return redirect('add_to_cart')
+                    return redirect('cart')
                 else:
                     message = 'Product out of stock'
 
@@ -85,3 +87,7 @@ def product_view(request,id):
         'form': add_to_cart_form
     }
     return render(request, 'productos/product.html', context)
+
+
+
+    

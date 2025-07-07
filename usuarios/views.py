@@ -1,8 +1,8 @@
 from django.shortcuts import render,redirect, get_object_or_404
-from .forms import ShippingAddressForm, UserForm, CustomerForm
+from .forms import ShippingAddressForm, UserForm, CustomerForm, CustomLoginForm
 from django.contrib.auth.decorators import login_required
 from django import forms 
-from django.contrib.auth.forms import AuthenticationForm
+# from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 
 from usuarios.models import Customer, ShippingAddress
@@ -17,7 +17,7 @@ def login_view(request):
     if request.user.is_authenticated and not request.user.is_superuser: return redirect('profile')
 
     if request.method=='POST':
-        form= AuthenticationForm(request, data=request.POST) #formulario de django para autentificacion
+        form= CustomLoginForm(request, data=request.POST) #formulario de django para autentificacion
         if form.is_valid():
             user= form.cleaned_data.get('username')
             password= form.cleaned_data.get('password')
@@ -26,7 +26,7 @@ def login_view(request):
                 login(request, user) #inicia sesion del usuario 
                 return redirect('profile')
     else:
-        form= AuthenticationForm()
+        form= CustomLoginForm()
     
     return render (request, 'usuarios/login.html',context={'login_form':form})
 
@@ -122,6 +122,7 @@ def edit_adress_view(request,id):
             shipping_address.customer= customer
             shipping_address.save()
             #guarda la direccion
+            return redirect('profile')
     else:
         #cuando apenas vamos a editar los datos 
         shipping_form= ShippingAddressForm(instance=address)

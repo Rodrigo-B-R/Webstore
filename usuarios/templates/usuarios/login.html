@@ -1,19 +1,47 @@
-{% extends 'base.html'%}
-
-
-
+{% extends 'base.html' %}
 
 {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow rounded-3">
+        <div class="card-header bg-primary text-white text-center">
+          <h4 class="mb-0">Iniciar Sesión</h4>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            {% csrf_token %}
+
+            <!-- Campo de Usuario -->
+            <div class="mb-3">
+              <label for="id_username" class="form-label">Username</label>
+              {{ login_form.username }}
+              {% if login_form.address.errors %}
+                <div class="text-danger small">{{ login_form.username.errors.0 }}</div>
+              {% endif %}
+            </div>
 
 
+            <!-- Campo de Contraseña -->
+            <div class="mb-3">
+              <label for="id_password" class="form-label">Contraseña</label>
+              {{ login_form.password }}
+              {% if login_form.password.errors %}
+                <div class="text-danger small">{{ login_form.password.errors.0 }}</div>
+              {% endif %}
+            </div>
 
-<form action="" method="post">
-    {% csrf_token %}
-    {{ login_form.as_p }}
-    <button> Login </button>
-    
-</form>
-
-<a href="{% url 'signup' %}"> Signup </a>
-
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </div>
+          </form>
+        </div>
+        <div class="card-footer text-center">
+          <small>¿No tienes cuenta?</small><br>
+          <a href="{% url 'signup' %}" class="btn btn-link">Registrarse</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
