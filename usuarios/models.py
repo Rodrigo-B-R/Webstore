@@ -22,7 +22,7 @@ class ShippingAddress(models.Model):
 
     #clase hija de customer y order
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
-    order = models.ForeignKey('carrito.Order', on_delete=models.SET_NULL, null=True)
+    
     
     #atributos
     address = models.CharField(max_length=200)

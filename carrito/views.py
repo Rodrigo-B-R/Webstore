@@ -94,6 +94,8 @@ def checkout_view(request,order_id):
    
     user=request.user
     shipping_addresses = customer.shippingaddress_set.all()
+
+
     
     
 
