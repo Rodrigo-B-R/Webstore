@@ -5,6 +5,7 @@ import json
 from .models import OrderItem, Order
 from .forms import OrderItemForm
 from productos.models import Product, ProductImage
+from django.conf import settings
 
 # Create your views here.
 
@@ -15,14 +16,16 @@ from productos.models import Product, ProductImage
 def cart_view(request):
 
     customer= request.user.customer
+   
 
     try:
-        order= Order.objects.get(customer=customer)
+        order= Order.objects.get(customer=customer, complete=False)
     
     except Order.DoesNotExist : 
         order = Order.objects.create(customer=request.user.customer, complete=False)
 
-    items= OrderItem.objects.filter(order=order)
+    items= order.orderitem_set.all()
+    
     
 
     context= {'order':order,'items':items}
@@ -32,11 +35,11 @@ def cart_view(request):
     return render(request, 'carrito/cart.html', context)
 
 
-def delete_item_view(request, id):
+def delete_item_view(request, item_id):
 
     if request.method=='POST':
-        order= Order.objects.get(customer=request.user.customer,complete=False )
-        item=get_object_or_404(OrderItem,pk=id,order=order)
+        order= Order.objects.get(customer=request.user.customer,complete=False)
+        item=get_object_or_404(OrderItem,pk=item_id,order=order)
         item.delete()
         return redirect('cart')
             
@@ -78,14 +81,12 @@ def checkout_view(request,order_id):
     # puedes redirigir a completar perfil o mostrar error
         return redirect('sign_up')
 
-    order= get_object_or_404(Order,pk=order_id,complete=False)
+    order= get_object_or_404(Order,pk=order_id,complete=False,customer=request.user.customer)
     order_items= order.orderitem_set.all()
 
-    products=[]
 
     for order_item in order_items:
         if order_item.product.stock >= order_item.quantity:
-            
             
             continue
         else:
@@ -99,7 +100,7 @@ def checkout_view(request,order_id):
     
     
 
-    context={'order_items':order_items,'customer':customer, 'user':user,'shipping_addresses':shipping_addresses,'order':order}
+    context={'order_items':order_items,'customer':customer, 'user':user,'shipping_addresses':shipping_addresses,'order':order,'STRIPE_PUBLIC_KEY':settings.STRIPE_PUBLIC_KEY}
 
 
         

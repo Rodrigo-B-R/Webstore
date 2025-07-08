@@ -16,7 +16,7 @@
                         <small>Subtotal: ${{ item.get_total }}</small>
                     </div>
                     {% if item.product.images.first %}
-                        <img src="{{ item.product.images.first.image.url }}" class="card-img-top img-fluid"  style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+                        <img src="{{ item.product.images.first.image.url }}" class="card-img-top img-fluid"  style="height: 200px; object-fit: contain;" alt="{{ item.product.name }}">
                     {% else %}
                         <img src="{% static 'imgs/placeholder.jpg' %}" class="card-img-top img-fluid" style="height: 200px; object-fit: contain;"  alt="Sin imagen">
                     {% endif %}
@@ -44,12 +44,35 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Proceder al pago</button>
+                        <button type="submit" class="btn btn-primary w-100" id="checkout-button">Proceder al pago</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+        const form = document.getElementById("shippingForm");
+        const button = document.getElementById("checkout-button");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const shippingId = document.getElementById("shippingSelect").value;
+
+            fetch("{% url 'crear_pago' order.id %}?shipping_id=" + shippingId)
+                .then(res => res.json())
+                .then(data => {
+                    stripe.redirectToCheckout({ sessionId: data.id });
+                })
+                .catch(err => console.error(err));
+        });
+    });
+</script>
 {% endblock %}
