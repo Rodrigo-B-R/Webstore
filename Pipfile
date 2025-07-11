@@ -8,6 +8,9 @@ django = "*"
 pillow = "*"
 django-extensions = "*"
 stripe = "*"
+django-allauth = "*"
+pyjwt = "*"
+cryptography = "*"
 
 [dev-packages]
 

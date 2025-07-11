@@ -43,6 +43,15 @@ INSTALLED_APPS = [
     'pedidos',
     'pagos',
     'carrito',
+
+    'django.contrib.sites',  # django auth settings 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    
+    
 ]
 
 MIDDLEWARE = [
@@ -51,8 +60,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',#django auth setting
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'online_store.urls'
@@ -129,7 +140,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = 'login'
+LOGIN_URL = '/accounts/login/'
 
 
 MEDIA_URL = 'media/'
@@ -138,3 +149,36 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #Modo test
 STRIPE_PUBLIC_KEY='pk_test_51RiTtaPJ2yFKupFRZZvT1LVsAEaravS1tA2SbPSJ3SMhZLlKCxCPiwKPzXn3ZbI5A7CBU7h9hk44EaE4ImUWZlfb00ao0KVUyB'
 STRIPE_SECRET_KEY='sk_test_51RiTtaPJ2yFKupFRxvNKUNwvGhgvLJSl4bTlpPTAhIihb5ufqOIUY9sbxN2WO65HDKpCuAd383U7vDwKZSbH7g6V00EtwLRz4I'
+STRIPE_WEBHOOK_SECRET='whsec_8cbff42ceea3b18d85931b52870ee3990a108fab21e7640872ab323e502b92b6'
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # auth normal
+    'allauth.account.auth_backends.AuthenticationBackend',  # para social
+]
+
+SITE_ID = 1
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+
+
+
+
+
+ACCOUNT_LOGIN_METHODS = {'username'}  # o {'username'}, o ambos {'username', 'email'}
+
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+LOGIN_REDIRECT_URL = '/'
+
+SOCIALACCOUNT_AUTO_SIGNUP=True
+
+
+
+ACCOUNT_FORMS = {
+    'signup': 'usuarios.forms.CustomSignupForm',
+    'login':'usuarios.forms.CustomLoginForm',
+}

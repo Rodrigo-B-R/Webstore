@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+
+
+{% load socialaccount %}  {# Necesario para usar provider_login_url #}
+
+{% block content %}
+<div class="container py-5 rounded-0">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow rounded-0">
+        <div class="card-header bg-ligth text-white text-center rounded-0">
+          <h4 class="mb-0 text-dark">Iniciar Sesión</h4>
+        </div>  
+        <div class="card-body">
+          <form method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <!-- Campo de Usuario o Email -->
+            <div class="mb-3">
+              <label for="{{ form.username.id_for_label }}" class="form-label">Usuario o Correo</label>
+              {{ form.username }}
+              {% if form.username.errors %}
+                <div class="text-danger small">{{ form.username.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Campo de Contraseña -->
+            <div class="mb-3">
+              <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+              {{ form.password }}
+              {% if form.password.errors %}
+                <div class="text-danger small">{{ form.password.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-dark">Iniciar Sesión</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card-body text-center">
+          <hr>
+          <h5>O inicia sesión con:</h5>
+          <a href="{% provider_login_url 'google' %}" class="btn btn-light">
+            <i class="fab fa-google me-2"></i> Iniciar sesión con Google
+          </a>
+        </div>
+
+        <div class="card-footer text-center">
+          <small>¿No tienes cuenta?</small><br>
+          <a href="{% url 'account_signup' %}" class="btn btn-link">Registrarse</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+

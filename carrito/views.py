@@ -6,9 +6,39 @@ from .models import OrderItem, Order
 from .forms import OrderItemForm
 from productos.models import Product, ProductImage
 from django.conf import settings
+from .utils import verificar_stock
+from usuarios.forms import ShippingAddressForm
 
 # Create your views here.
 
+@login_required
+def proccess_checkout(request, order_id):
+    order = get_object_or_404(Order, id=order_id, complete=False, customer=request.user.customer)
+
+    if request.method == 'POST':
+        form = ShippingAddressForm(request.POST)
+
+        if form.is_valid():
+            shipping_address = form.save(commit=False)
+            shipping_address.customer = request.user.customer
+            shipping_address.save()
+
+            # Asociar dirección con la orden
+            order.shipping_address = shipping_address
+            order.save()
+
+            # Redirigir a la vista que genera la sesión de Stripe
+            return redirect('crear_pago',order_id)
+        else:
+            return render(request, 'carrito/checkout.html', {
+                'order': order,
+                'order_items': order.orderitem_set.all(),
+                'shipping_form': form,
+                'shipping_addresses': request.user.customer.shippingaddress_set.all(),
+            })
+
+    # Si alguien entra manualmente por GET
+    return redirect('cart')  # o podrías mostrar un error
 
 
 
@@ -17,12 +47,7 @@ def cart_view(request):
 
     customer= request.user.customer
    
-
-    try:
-        order= Order.objects.get(customer=customer, complete=False)
-    
-    except Order.DoesNotExist : 
-        order = Order.objects.create(customer=request.user.customer, complete=False)
+    order, created= Order.objects.get_or_create(customer=customer,complete=False)
 
     items= order.orderitem_set.all()
     
@@ -82,27 +107,16 @@ def checkout_view(request,order_id):
         return redirect('sign_up')
 
     order= get_object_or_404(Order,pk=order_id,complete=False,customer=request.user.customer)
-    order_items= order.orderitem_set.all()
-
-
-    for order_item in order_items:
-        if order_item.product.stock >= order_item.quantity:
-            
-            continue
-        else:
-            return redirect('cart')
     
+    if verificar_stock(order) == False : return redirect('cart')
+
+    order_items= order.orderitem_set.all()
    
     user=request.user
     shipping_addresses = customer.shippingaddress_set.all()
 
+    context={'order_items':order_items,'customer':customer, 'user':user,'shipping_addresses':shipping_addresses,'order':order,'STRIPE_PUBLIC_KEY':settings.STRIPE_PUBLIC_KEY,'shipping_form':ShippingAddressForm}
 
-    
-    
-
-    context={'order_items':order_items,'customer':customer, 'user':user,'shipping_addresses':shipping_addresses,'order':order,'STRIPE_PUBLIC_KEY':settings.STRIPE_PUBLIC_KEY}
-
-
-        
+   
     return render(request,'carrito/checkout.html',context)
     

@@ -1,12 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import stripe
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from carrito.models import Order
 from usuarios.models import ShippingAddress
 from productos.models import Product
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from carrito.utils import verificar_stock
 # Create your views here.
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -14,25 +16,24 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 from django.shortcuts import get_object_or_404
 from usuarios.models import ShippingAddress  
 
+
+
+
 #maneja el pago con stripe
 @login_required
 def stripe_checkout_session(request, order_id):
-    shipping_id = request.GET.get('shipping_id')
-
     order = get_object_or_404(Order, id=order_id, complete=False, customer=request.user.customer)
 
-    #guardamos el shipping address seleccionado de esta orden
-    if shipping_id:
-        try:
-            shipping_address = ShippingAddress.objects.get(id=shipping_id, customer=order.customer)
-            order.shipping_address = shipping_address
-            order.save()
-        except ShippingAddress.DoesNotExist:
-            return JsonResponse({'error': 'Dirección de envío inválida'}, status=400)
+    # Verifica que tenga dirección de envío asignada
+    if not order.shipping_address:
+        return redirect('process_checkout', order_id=order.id)
 
+    # Verifica stock
+    if not verificar_stock(order):
+        return redirect('cart')
+
+    # Construir line_items para Stripe
     line_items = []
-
-    #por cada item lo prepara para usar stripe
     for item in order.orderitem_set.all():
         line_items.append({
             'price_data': {
@@ -45,35 +46,74 @@ def stripe_checkout_session(request, order_id):
             'quantity': item.quantity,
         })
 
-    #crea un sesion de checkout de stripe 
+    # Crear sesión de Stripe
     try:
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=line_items,
             mode='payment',
-            success_url='http://127.0.0.1:8000/pagos/success',
+            success_url=f'http://127.0.0.1:8000/pagos/success?order_id={order.id}',
             cancel_url=f'http://127.0.0.1:8000/cart/checkout/?order_id={order.id}',
             metadata={'order_id': order.id}
         )
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        print("Error con Stripe:", e)
+        return redirect('cart')
 
-    return JsonResponse({'id': checkout_session.id})
+    # Redirigir directamente al checkout de Stripe
+    return redirect(checkout_session.url)
+
+
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET  # La añades en settings
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError:
+        return HttpResponse(status=400)  # payload inválido
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)  # firma inválida
+
+    # Solo actuamos cuando Stripe confirma pago exitoso
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        order_id = session['metadata']['order_id']
+
+        # if session['payment_status'] == 'paid':
+        order = get_object_or_404(Order, id=order_id, complete=False)
+
+            # ✅ Actualizamos el stock y marcamos como completa
+        for item in order.orderitem_set.all():
+            product = item.product
+            product.stock -= item.quantity
+            product.save()
+
+        order.complete = True
+        order.date_ordered= timezone.now()
+        order.save()
+
+    return HttpResponse(status=200)
 
 
 @login_required
-def order_complete_view(request,order_id):
+def successful_payment_view(request):
 
-    order = get_object_or_404(Order, id=order_id, complete=False, customer= request.user.customer)
-
-    order_items= order.orderitems_set.all()
-    products= order.orderitems_set.all().product
-
-    for product in products:
-        product.stock -= order_items.quantity
+    order_id=request.GET.get('order_id')
 
 
+    try:
+        order= Order.objects.get(complete=True, customer= request.user.customer,id=order_id)
+    except:   
+        return render(request, 'pagos/success.html', {'message': 'No se encontró una orden completada.'})
+    
+    context={'order':order, 'order_items': order.orderitem_set.all()}
 
-    order.complete=True
-
-    return render(request,'pagos/success.html')
+    return render(request,'pagos/success.html', context)

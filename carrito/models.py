@@ -15,6 +15,8 @@ class Order(models.Model):
     complete= models.BooleanField(default=False)
     transaction_id= models.CharField(max_length=100 , null=True)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    enviado= models.BooleanField(default=False)
+    entregado= models.BooleanField(default=False)
 
 
 

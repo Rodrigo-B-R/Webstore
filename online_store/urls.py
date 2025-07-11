@@ -24,10 +24,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path('auth/',include('usuarios.urls')),
-    path('payment/', include("pagos.urls")),
+    path('pagos/', include("pagos.urls")),
     path('order/', include("pedidos.urls")),
     path('', include("productos.urls")),
-    path('cart/',include("carrito.urls"))
+    path('cart/',include("carrito.urls")),
+    path('accounts/', include('allauth.urls'))
     
 ]
 

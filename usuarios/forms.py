@@ -3,6 +3,24 @@ from usuarios.models import Customer, ShippingAddress
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User 
 from django import forms
+from allauth.account.forms import SignupForm, LoginForm
+
+
+
+
+class CustomSignupForm(SignupForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class']='form-control'
+
+
+class CustomLoginForm(LoginForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class']='form-control'
+        print(self.fields.keys())
 
 
 #Formulario de usuario

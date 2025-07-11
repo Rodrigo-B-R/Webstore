@@ -6,7 +6,7 @@
     <h2 class="mb-4">Resumen de tu orden</h2>
 
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="list-group mb-4">
                 {% for item in order_items %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
@@ -23,56 +23,52 @@
                 </div>
                 {% endfor %}
             </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'process_checkout' order.id%}">
+                    {% csrf_token %}
 
-            <h4>Total: ${{ order.get_cart_total }}</h4>
-        </div>
+                    <!-- Dirección -->
+                    <div class="mb-3">
+                    <label for="id_address" class="form-label">Dirección</label>
+                    {{ shipping_form.address }}
+                    {% if shipping_form.address.errors %}
+                        <div class="text-danger small">{{ shipping_form.address.errors.0 }}</div>
+                    {% endif %}
+                    </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Dirección de envío</h5>
-                </div>
-                <div class="card-body">
-                    <form id="shippingForm">
-                        <div class="form-group mb-3">
-                            <label for="shippingSelect">Selecciona una dirección guardada:</label>
-                            <select class="form-select" id="shippingSelect">
-                                {% for address in shipping_addresses %}
-                                <option value="{{ address.id }}">
-                                    {{ address.address }}, {{ address.city }} ({{ address.zipcode }})
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100" id="checkout-button">Proceder al pago</button>
-                    </form>
-                </div>
+                    <!-- Ciudad -->
+                    <div class="mb-3">
+                    <label for="id_city" class="form-label">Ciudad</label>
+                    {{ shipping_form.city }}
+                    {% if shipping_form.city.errors %}
+                        <div class="text-danger small">{{ shipping_form.city.errors.0 }}</div>
+                    {% endif %}
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="mb-3">
+                    <label for="id_state" class="form-label">Estado</label>
+                    {{ shipping_form.state }}
+                    {% if shipping_form.state.errors %}
+                        <div class="text-danger small">{{ shipping_form.state.errors.0 }}</div>
+                    {% endif %}
+                    </div>
+
+                    <!-- Código Postal -->
+                    <div class="mb-3">
+                    <label for="id_zipcode" class="form-label">Código Postal</label>
+                    {{ shipping_form.zipcode }}
+                    {% if shipping_form.zipcode.errors %}
+                        <div class="text-danger small">{{ shipping_form.zipcode.errors.0 }}</div>
+                    {% endif %}
+
+                    
+                    </div>
+
+
+                    <h4>Total: ${{ order.get_cart_total }}</h4>
+                    <button type="submit" class="btn btn-primary w-100">Proceder al pago</button>
             </div>
-        </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
-        const form = document.getElementById("shippingForm");
-        const button = document.getElementById("checkout-button");
-
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const shippingId = document.getElementById("shippingSelect").value;
-
-            fetch("{% url 'crear_pago' order.id %}?shipping_id=" + shippingId)
-                .then(res => res.json())
-                .then(data => {
-                    stripe.redirectToCheckout({ sessionId: data.id });
-                })
-                .catch(err => console.error(err));
-        });
-    });
-</script>
 {% endblock %}
