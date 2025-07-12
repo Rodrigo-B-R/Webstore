@@ -1,36 +1,31 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
-
-
 <div class="container-fluid">
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2">
     {% for product in products %}
       <div class="col">
-        <div class="card h-100 rounded-0 border-0">
-          <a href="{% url 'product' product.id %}">
-            {% if product.images.first %}
-              <img src="{{ product.images.first.image.url }}" class="card-img-top img-fluid"  style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+        <div class="card h-100 rounded-0 border-0 product-card">
+          <a href="{% url 'product' product.id %}" class="position-relative d-block">
+            {% if product.images.all|length >= 2 %}
+              <img src="{{ product.images.all.0.image.url }}" class="card-img-top main-img img-fluid" style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+              <img src="{{ product.images.all.1.image.url }}" class="card-img-top hover-img img-fluid" style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+            {% elif product.images.first %}
+              <img src="{{ product.images.first.image.url }}" class="card-img-top main-img img-fluid" style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
             {% else %}
-              <img src="{% static 'imgs/placeholder.jpg' %}" class="card-img-top img-fluid" style="height: 200px; object-fit: contain;"  alt="Sin imagen">
+              <img src="{% static 'imgs/placeholder.jpg' %}" class="card-img-top main-img img-fluid" style="height: 200px; object-fit: contain;" alt="Sin imagen">
             {% endif %}
           </a>
           <div class="card-body">
-            <p  class=" fs-10 card-title text-center">  <b>{{ product.name }}  </b></p>
-
-            <p style="font-size: 12px;" class="card-text text-center">${{ product.price }}</p>
+            <p class="fs-8 card-text text-center" style="font-size: 14px"><b>{{ product.name }}</b></p>
+            <p class="card-text text-center" style="font-size: 12px;">${{ product.price }}</p>
           </div>
         </div>
       </div>
     {% endfor %}
   </div>
 </div>
-
-
-
-
 {% endblock %}
 
 

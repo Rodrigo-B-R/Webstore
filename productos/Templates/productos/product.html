@@ -10,7 +10,7 @@
       <div class="card border-0 rounded-0">
         <div class="card-img-top"> 
           {% for image in product.images.all %}
-            <img src="{{ image.image.url }}" class="img-thumbnail" alt="Miniatura {{ forloop.counter }}">
+            <img src="{{ image.image.url }}" class="img-thumbnail" alt="Miniatura {{ forloop.counter }}" onclick="changeImage('{{image.image.url}}')">
           {% endfor %}
           
         </div>
@@ -22,7 +22,10 @@
       <div class="card border-0 rounded-0">
         <div class="card-img-top">
           {% if product.images.first %}
-            <img src="{{ product.images.first.image.url }}" class="img-fluid" alt="Imagen principal">
+            <img id='main-image' src="{{ product.images.first.image.url }}" 
+              class="img-fluid border rounded" 
+              style="height: 400px; object-fit: contain;" 
+              alt="{{ product.name }}">
           {% else %}
             <img src="{% static 'imgs/placeholder.jpg'%}" class="img-fluid" alt="Sin imagen">
           {% endif %}
@@ -58,4 +61,8 @@
 
   </div>
 </div>
+
+<script src="{% static 'js/product.js' %}" defer> </script>
 {% endblock %}
+
+

@@ -11,6 +11,9 @@ stripe = "*"
 django-allauth = "*"
 pyjwt = "*"
 cryptography = "*"
+cloudinary = "*"
+django-cloudinary-storage = "*"
+whitenoise = "*"
 
 [dev-packages]
 
