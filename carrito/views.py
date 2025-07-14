@@ -191,7 +191,7 @@ def process_checkout_router(request,order_id):
     if request.user.is_authenticated:
         return proccess_checkout_view_authenticated(request,order_id)
     else:
-        return process_checkout_view_guest
+        return process_checkout_view_guest(request)
 
 @login_required
 def proccess_checkout_view_authenticated(request, order_id):

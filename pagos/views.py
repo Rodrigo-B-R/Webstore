@@ -9,32 +9,29 @@ from productos.models import Product
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from carrito.utils import check_stock
+from .utils import check_shipping_addres
 # Create your views here.
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from django.shortcuts import get_object_or_404
 from usuarios.models import ShippingAddress  
+from carrito.models import GuestOrder,GuestOrderItem
 
 
 
 
 #maneja el pago con stripe
-@login_required
-def stripe_checkout_session(request, order_id):
-    order = get_object_or_404(Order, id=order_id, complete=False, customer=request.user.customer)
 
-    # Verifica que tenga dirección de envío asignada
-    if not order.shipping_address:
-        return redirect('process_checkout', order_id=order.id)
+def stripe_checkout_session_router(request,order_id):
+    if request.user.is_authenticated:
+        return stripe_checkout_session_authenticated(request,order_id)
+    else: 
+        return stripe_checkout_session_guest(request)
 
-    # Verifica stock
-    if not check_stock(request,order):
-        return redirect('cart')
-
-    # Construir line_items para Stripe
+def create_stripe_session(items,order):
     line_items = []
-    for item in order.orderitem_set.all():
+    for item in items:
         line_items.append({
             'price_data': {
                 'currency': 'mxn',
@@ -62,6 +59,36 @@ def stripe_checkout_session(request, order_id):
 
     # Redirigir directamente al checkout de Stripe
     return redirect(checkout_session.url)
+
+
+def stripe_checkout_session_guest(request):
+    order_id = request.session.get('guest_order_id')
+    order= GuestOrder.objects.get(id=order_id,complete=False)
+
+    check_shipping_addres(order)
+
+    if not check_stock(request,order):
+        return redirect('cart')
+    
+    items= order.items.all()
+    
+    return create_stripe_session(items, order)
+
+
+@login_required
+def stripe_checkout_session_authenticated(request, order_id):
+    order = get_object_or_404(Order, id=order_id, complete=False, customer=request.user.customer)
+
+    # Verifica que tenga dirección de envío asignada
+    check_shipping_addres(order)
+
+    # Verifica stock
+    if not check_stock(request,order):
+        return redirect('cart')
+    
+    items= order.orderitem_set.all()
+
+    return create_stripe_session(items, order)
 
 
 
