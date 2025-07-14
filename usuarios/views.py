@@ -11,13 +11,6 @@ from usuarios.models import Customer, ShippingAddress
 
 # Create your views here.
 
-
-
-
-#formulario de registro
-
-
-
 #cerrar sesion 
 
 @login_required
@@ -45,55 +38,6 @@ def profile_view(request):
     context={"user":request.user,"customer":customer,'shipping_addresses':shipping_addresses }
 
     return render (request,"usuarios/profile.html",context=context)
-
-#formulario de direccion
-
-@login_required
-def shippingAddress_view(request):
-    if request.method== 'POST':
-
-        shipping_form= ShippingAddressForm(request.POST)
-        if shipping_form.is_valid():
-            shipping_address=shipping_form.save( commit= False )
-            shipping_address.customer= request.user.customer
-            shipping_address.save()
-            return redirect('profile')
-            #guarda la direccion
-    else:
-        shipping_form= ShippingAddressForm
-    
-    return render(request, 'usuarios/shippingAddress.html' ,context={'shipping_form':shipping_form})
-
-#editar direcciones de envio 
-def edit_adress_view(request,id):
-
-    
-    customer= request.user.customer
-
-    address= get_object_or_404(ShippingAddress,pk=id,customer=customer)
-
-    #cuando se envia el formulario con los datos nuevos
-    if request.method== 'POST':
-
-        shipping_form= ShippingAddressForm(request.POST, instance=address) #el formulario cambia el adress actual
-        
-        if shipping_form.is_valid():
-            shipping_address=shipping_form.save( commit= False )
-            shipping_address.customer= customer
-            shipping_address.save()
-            #guarda la direccion
-            return redirect('profile')
-    else:
-        #cuando apenas vamos a editar los datos 
-        shipping_form= ShippingAddressForm(instance=address)
-
-    context={'shipping_form':shipping_form,'mode':'edit'}
-
-    
-
-    
-
-    return render(request,'usuarios/shippingAddress.html',context)
 
 
 @login_required

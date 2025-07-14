@@ -9,8 +9,8 @@ from django.conf import settings
 from .utils import verificar_stock
 from usuarios.forms import ShippingAddressForm
 
-# Create your views here.
 
+# Create your views here.
 @login_required
 def proccess_checkout(request, order_id):
     order = get_object_or_404(Order, id=order_id, complete=False, customer=request.user.customer)
@@ -42,22 +42,25 @@ def proccess_checkout(request, order_id):
 
 
 
-@login_required
+# @login_required
 def cart_view(request):
 
-    customer= request.user.customer
-   
-    order, created= Order.objects.get_or_create(customer=customer,complete=False)
+    if request.user.is_authenticated:
 
-    items= order.orderitem_set.all()
+        customer= request.user.customer
     
-    
+        order, created= Order.objects.get_or_create(customer=customer,complete=False)
 
-    context= {'order':order,'items':items}
+        items= order.orderitem_set.all()    
+        
+        
+
+        context= {'order':order,'items':items}
 
 
 
-    return render(request, 'carrito/cart.html', context)
+        return render(request, 'carrito/cart.html', context)
+
 
 
 def delete_item_view(request, item_id):
@@ -120,3 +123,4 @@ def checkout_view(request,order_id):
    
     return render(request,'carrito/checkout.html',context)
     
+

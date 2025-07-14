@@ -12,6 +12,7 @@ class Product(models.Model):
     price= models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
     description= models.TextField(null=True, blank= True)
+    visible= models.BooleanField(default=True)
     
 
     def __str__(self):

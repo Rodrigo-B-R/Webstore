@@ -15,8 +15,8 @@ class Order(models.Model):
     complete= models.BooleanField(default=False)
     transaction_id= models.CharField(max_length=100 , null=True)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
-    enviado= models.BooleanField(default=False)
-    entregado= models.BooleanField(default=False)
+    sent= models.BooleanField(default=False)
+    delivered= models.BooleanField(default=False)
 
 
 
@@ -53,5 +53,33 @@ class OrderItem(models.Model):
     @property
     def get_total(self):
         return self.product.price * self.quantity
+    
+
+class GuestOrder(models.Model):
+    email = models.EmailField()
+    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    sent = models.BooleanField(default=False)
+    delivered = models.BooleanField(default=False)
+    date_ordered= models.DateField(auto_now_add=True)
+    transaction_id= models.CharField(max_length=100 , null=True)
+    complete= models.BooleanField(default=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transaction_id= str(uuid.uuid4())
+
+    @property
+    def get_cart_items(self):
+        return sum([item.quantity for item in self.orderitem_set.all()])
+
+
+class GuestOrderItem(models.Model):
+    order = models.ForeignKey(GuestOrder, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey('productos.Product', on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def get_total(self):
+        return self.quantity * self.product.price
     
  

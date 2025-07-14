@@ -5,6 +5,7 @@
 <div class="container-fluid">
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2">
     {% for product in products %}
+    {% if product.visible == True %}
       <div class="col">
         <div class="card h-100 rounded-0 border-0 product-card">
           <a href="{% url 'product' product.id %}" class="position-relative d-block">
@@ -18,11 +19,11 @@
             {% endif %}
           </a>
           <div class="card-body">
-            <p class="fs-8 card-text text-center" style="font-size: 14px"><b>{{ product.name }}</b></p>
-            <p class="card-text text-center" style="font-size: 12px;">${{ product.price }}</p>
+            <p class="fs-8 card-text text-center" style="font-size: 14px"><b>{{ product.name }}</b> <br> ${{ product.price }} </p>
           </div>
         </div>
       </div>
+    {% endif %}
     {% endfor %}
   </div>
 </div>

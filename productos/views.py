@@ -1,21 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
 import os
 from .models import Product
-from django.utils import timezone
-import uuid
 
 #Importo los modelos y forms de carrito
-from carrito.forms import OrderItemForm
-from carrito.models import Order, OrderItem
+from carrito.forms import OrderItemForm, GuestOrderItemForm
+from carrito.models import Order, OrderItem, GuestOrder, GuestOrderItem
 
 from django.contrib.auth.decorators import login_required
+from .utils import get_product_or_redirect
 
 # Create your views here.
 
 
 def main_page_view(request):
 
-    products= Product.objects.all()
+    products= Product.objects.filter(visible=True)
 
     context={'products':products}
 
@@ -24,70 +23,89 @@ def main_page_view(request):
 
     return render(request,'productos/main_page.html',context=context)
 
+def product_router_view(request, product_id):
+    if request.user.is_authenticated:
+        return product_view_authenticated(request, product_id)
+    else:
+        return product_view_guest(request, product_id)
+
+
 
 @login_required
-def product_view(request,id):
-    #usa la logica de carrito para añadir productos 
-    product = get_object_or_404(Product, id=id)
-    product_quantity= product.stock
+def product_view_authenticated(request, product_id):
+    product = get_product_or_redirect(product_id)
+    if not product:
+        return redirect('main_page')
 
-    add_to_cart_form = OrderItemForm()
+    form = OrderItemForm(request.POST or None)
 
-    #si recibimos una peticion para añadir al carrito
-    if request.method == 'POST':
+    if request.method == 'POST' and form.is_valid():
+        order_item = form.save(commit=False)
+        order_item.product = product
+        order, _ = Order.objects.get_or_create(customer=request.user.customer, complete=False)
 
-        add_to_cart_form = OrderItemForm(request.POST)
+        existing_item = OrderItem.objects.filter(order=order, product=product).first()
 
-        if add_to_cart_form.is_valid():
+        if existing_item:
+            existing_item.quantity += order_item.quantity
+            if existing_item.quantity <= product.stock:
+                existing_item.save()
+                return redirect('cart')
+        else:
+            if order_item.quantity <= product.stock:
+                order_item.order = order
+                order_item.save()
+                return redirect('cart')
 
-            order_item = add_to_cart_form.save(commit=False)
-            order_item.product = product
-            customer = request.user.customer
+        return render(request, 'productos/product.html', {
+            'product': product,
+            'form': form,
+            'message': 'Product out of stock',
+        })
 
-            # Obtener o crear una orden activa para el usuario
-            order, created = Order.objects.get_or_create(customer=customer, complete=False)
-            
-
-
-            # Buscar si ya existe un OrderItem con ese producto en la orden
-            existing_item = OrderItem.objects.filter(order=order, product=product).first()
-
-            if existing_item:
-                # Sumar cantidades si ya existe ese producto
-                existing_item.quantity += order_item.quantity
-                #checa si hay stock suficiente
-                if existing_item.quantity <= product_quantity:
-                    existing_item.save()
-                    return redirect('cart')
-                else: 
-                    context = {
-                                'product': product,
-                                'form': add_to_cart_form,
-                                'message': 'Product out of stock'
-                                }
-                    return render(request, 'productos/product.html',context)
-            else:
-                if order_item.quantity <= product_quantity:
-                    order_item.order = order
-                    order_item.save()
-                    return redirect('cart')
-                else:
-                    message = 'Product out of stock'
-
-                    # si no se pudo guardar por stock insuficiente
-                    context = {
-                        'product': product,
-                        'form': add_to_cart_form,
-                        'message': message
-                    }
-
-        
-    context = {
-        'product': product,
-        'form': add_to_cart_form
-    }
-    return render(request, 'productos/product.html', context)
+    return render(request, 'productos/product.html', {'product': product, 'form': form})
 
 
 
-    
+def product_view_guest(request, product_id):
+    product = get_product_or_redirect(product_id)
+    if not product:
+        return redirect('main_page')
+
+    form = GuestOrderItemForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        order_item = form.save(commit=False)
+        order_item.product = product
+
+        order_id = request.session.get('guest_order_id')
+        if order_id:
+            order = get_object_or_404(GuestOrder, id=order_id, complete=False)
+        else:
+            order = GuestOrder.objects.create()
+            request.session['guest_order_id'] = order.id
+
+        existing_item = GuestOrderItem.objects.filter(order=order, product=product).first()
+
+        if existing_item:
+            existing_item.quantity += order_item.quantity
+            if existing_item.quantity <= product.stock:
+                existing_item.save()
+                return redirect('cart')
+        else:
+            if order_item.quantity <= product.stock:
+                order_item.order = order
+                order_item.save()
+                return redirect('cart')
+
+        return render(request, 'productos/product.html', {
+            'product': product,
+            'form': form,
+            'message': 'Product out of stock',
+        })
+
+    return render(request, 'productos/product.html', {'product': product, 'form': form})
+
+
+
+

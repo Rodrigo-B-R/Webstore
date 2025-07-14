@@ -114,6 +114,18 @@ def successful_payment_view(request):
     except:   
         return render(request, 'pagos/success.html', {'message': 'No se encontró una orden completada.'})
     
+    order_items= order.orderitem_set.all()
+    for order in order_items:
+        if order.product.stock < 1:
+            order.product.visible=False
+    
     context={'order':order, 'order_items': order.orderitem_set.all()}
 
     return render(request,'pagos/success.html', context)
+
+
+# def guest_checkout(request):
+#     form= GuestCheckoutForm()
+#     if form.is_valid():
+#         email=form.cleaned_data['email']
+
