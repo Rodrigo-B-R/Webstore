@@ -71,6 +71,11 @@ class GuestOrder(models.Model):
     @property
     def get_cart_items(self):
         return sum([item.quantity for item in self.orderitem_set.all()])
+    
+    @property
+    def get_cart_total(self):
+        return sum([item.get_total for item in self.items.all()]) 
+        #itera por los objetos orderitem y suma sus precios
 
 
 class GuestOrderItem(models.Model):
@@ -79,6 +84,7 @@ class GuestOrderItem(models.Model):
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     date_added = models.DateTimeField(auto_now_add=True)
 
+    @property
     def get_total(self):
         return self.quantity * self.product.price
     

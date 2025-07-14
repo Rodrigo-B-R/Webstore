@@ -20,7 +20,11 @@ class OrderItemForm(ModelForm):
 
 
 class GuestCheckoutForm(forms.Form):
-    email= forms.EmailField(label='Correo electronico')
+     email = forms.EmailField(
+        label='Correo electrónico',
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+
 
     
 class GuestOrderItemForm(ModelForm):

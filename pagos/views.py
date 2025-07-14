@@ -8,7 +8,7 @@ from usuarios.models import ShippingAddress
 from productos.models import Product
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from carrito.utils import verificar_stock
+from carrito.utils import check_stock
 # Create your views here.
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -29,7 +29,7 @@ def stripe_checkout_session(request, order_id):
         return redirect('process_checkout', order_id=order.id)
 
     # Verifica stock
-    if not verificar_stock(order):
+    if not check_stock(request,order):
         return redirect('cart')
 
     # Construir line_items para Stripe

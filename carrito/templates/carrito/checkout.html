@@ -13,6 +13,19 @@
                 <form method="POST" action="{% url 'process_checkout' order.id%}">
                     {% csrf_token %}
 
+                    {% if guest_form %}
+
+                    <div class="mb-3">
+                    <label for="id_address" class="form-label">Email</label>
+                    {{ guest_form.email }}
+                    {% if guest_form.email.errors %}
+                        <div class="text-danger small">{{ guest_form.email.errors.0 }}</div>
+                    {% endif %}
+                    </div>
+
+
+                    {% endif %}
+
                         <!-- Dirección -->
                     <div class="mb-3">
                     <label for="id_address" class="form-label">Dirección</label>

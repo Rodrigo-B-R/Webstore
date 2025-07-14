@@ -25,7 +25,7 @@
                 <span class="mx-2">{{ item.quantity }}</span>
                 <button class="btn btn-sm btn-outline-black update-quantity" data-product="{{ item.product.id }}" data-action="increase" data-url="{% url 'update_quantity' item.product.id %}"> + </button>
                 
-                <form method="POST" action="{% url 'delete_item' item.id %}" onsubmit="return confirm('¿Estás seguro que deseas eliminar esta dirección?');" class="mt-2">
+                <form method="POST" action="{% url 'delete_item' item.id %}" onsubmit="return confirm('¿Estás seguro que deseas eliminar este producto?');" class="mt-2">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-outline-danger"> Eliminar </button>
                 </form>

@@ -7,7 +7,7 @@ from carrito.forms import OrderItemForm, GuestOrderItemForm
 from carrito.models import Order, OrderItem, GuestOrder, GuestOrderItem
 
 from django.contrib.auth.decorators import login_required
-from .utils import get_product_or_redirect
+from .utils import get_product_or_redirect, get_or_create_guest_order
 
 # Create your views here.
 
@@ -79,11 +79,7 @@ def product_view_guest(request, product_id):
         order_item.product = product
 
         order_id = request.session.get('guest_order_id')
-        if order_id:
-            order = get_object_or_404(GuestOrder, id=order_id, complete=False)
-        else:
-            order = GuestOrder.objects.create()
-            request.session['guest_order_id'] = order.id
+        order=get_or_create_guest_order(request)
 
         existing_item = GuestOrderItem.objects.filter(order=order, product=product).first()
 
