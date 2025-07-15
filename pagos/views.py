@@ -18,17 +18,24 @@ from django.shortcuts import get_object_or_404
 from usuarios.models import ShippingAddress  
 from carrito.models import GuestOrder,GuestOrderItem
 
+from .utils import get_order, get_order_by_id, update_order
 
 
+#1
+def stripe_checkout_session(request,order_id):
+    order= get_order(request,order_id)
 
-#maneja el pago con stripe
+    check_shipping_addres(order)
 
-def stripe_checkout_session_router(request,order_id):
-    if request.user.is_authenticated:
-        return stripe_checkout_session_authenticated(request,order_id)
-    else: 
-        return stripe_checkout_session_guest(request)
+    if not check_stock(request,order):
+        return redirect('cart')
+    
+    items= order.items.all()
+    
+    return create_stripe_session(items, order)
 
+
+#3
 def create_stripe_session(items,order):
     line_items = []
     for item in items:
@@ -61,38 +68,7 @@ def create_stripe_session(items,order):
     return redirect(checkout_session.url)
 
 
-def stripe_checkout_session_guest(request):
-    order_id = request.session.get('guest_order_id')
-    order= GuestOrder.objects.get(id=order_id,complete=False)
-
-    check_shipping_addres(order)
-
-    if not check_stock(request,order):
-        return redirect('cart')
-    
-    items= order.items.all()
-    
-    return create_stripe_session(items, order)
-
-
-@login_required
-def stripe_checkout_session_authenticated(request, order_id):
-    order = get_object_or_404(Order, id=order_id, complete=False, customer=request.user.customer)
-
-    # Verifica que tenga dirección de envío asignada
-    check_shipping_addres(order)
-
-    # Verifica stock
-    if not check_stock(request,order):
-        return redirect('cart')
-    
-    items= order.orderitem_set.all()
-
-    return create_stripe_session(items, order)
-
-
-
-
+#4
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
@@ -113,46 +89,31 @@ def stripe_webhook(request):
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         order_id = session['metadata']['order_id']
+        if session['payment_status'] == 'paid':
 
-        # if session['payment_status'] == 'paid':
-        order = get_object_or_404(Order, id=order_id, complete=False)
+            
+            order=get_order_by_id(order_id=order_id)
 
-            # ✅ Actualizamos el stock y marcamos como completa
-        for item in order.orderitem_set.all():
-            product = item.product
-            product.stock -= item.quantity
-            product.save()
+            update_order(order)
 
-        order.complete = True
-        order.date_ordered= timezone.now()
-        order.save()
-
-    return HttpResponse(status=200)
-
-
-@login_required
+        return HttpResponse(status=200)
+    
 def successful_payment_view(request):
 
     order_id=request.GET.get('order_id')
 
 
     try:
-        order= Order.objects.get(complete=True, customer= request.user.customer,id=order_id)
+        order= get_order(request,order_id=order_id,is_complete=True)
     except:   
         return render(request, 'pagos/success.html', {'message': 'No se encontró una orden completada.'})
     
-    order_items= order.orderitem_set.all()
-    for order in order_items:
-        if order.product.stock < 1:
-            order.product.visible=False
+    order_items= order.items.all()
+    for item in order_items:
+        if item.product.stock < 1:
+            item.product.visible=False
+            item.product.save()
     
-    context={'order':order, 'order_items': order.orderitem_set.all()}
+    context={'order':order, 'order_items': order_items}
 
     return render(request,'pagos/success.html', context)
-
-
-# def guest_checkout(request):
-#     form= GuestCheckoutForm()
-#     if form.is_valid():
-#         email=form.cleaned_data['email']
-

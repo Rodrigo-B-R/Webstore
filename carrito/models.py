@@ -30,20 +30,20 @@ class Order(models.Model):
     #metodos
     @property
     def get_cart_total(self):
-        return sum([item.get_total for item in self.orderitem_set.all()]) 
+        return sum([item.get_total for item in self.items.all()]) 
         #itera por los objetos orderitem y suma sus precios
     
     #numero de items en la orden 
     @property
     def get_cart_items(self):
-        return sum([item.quantity for item in self.orderitem_set.all()])
+        return sum([item.quantity for item in self.items.all()])
     
 #Modela un producto dentro de una orden
 class OrderItem(models.Model):
 
     #relacionada con producto y orden 
     product = models.ForeignKey('productos.Product', on_delete=models.SET_NULL, null=True) 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
 
     #atributos
     quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)])
@@ -70,7 +70,7 @@ class GuestOrder(models.Model):
 
     @property
     def get_cart_items(self):
-        return sum([item.quantity for item in self.orderitem_set.all()])
+        return sum([item.quantity for item in self.items.all()])
     
     @property
     def get_cart_total(self):
