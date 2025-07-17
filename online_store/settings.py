@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ct)(njt)x199pp*wgzh^w(6%xhnv$=(-!h@s103yv5=6=_34pe'
+SECRET_KEY =  config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,14 +92,31 @@ WSGI_APPLICATION = 'online_store.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+import psycopg2
+from dotenv import load_dotenv
+import os
+
+
+
+# Fetch variables
+USER = config("USER")
+PASSWORD = config("PASSWORD")
+HOST = config("HOST")
+PORT = config("PORT")
+DBNAME = config("DBNAME")
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DBNAME,
+        'USER': USER,
+        'PASSWORD': PASSWORD,
+        'HOST': HOST,  # ej. db.xxxxxxxxx.supabase.co
+        'PORT': PORT,
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -152,9 +170,9 @@ LOGIN_URL = '/accounts/login/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
-  'CLOUD_NAME': 'dc8lc4pnl',
-  'API_KEY': '759344413787729',
-  'API_SECRET': 'VPXMU5o79qEb_70psXfTWt8MLSM',  
+  'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+  'API_KEY': config('CLOUDINARY_API_KEY'),
+  'API_SECRET': config('CLOUDINARY_API_SECRET'), 
 }
 
 
@@ -163,9 +181,9 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #Modo test
-STRIPE_PUBLIC_KEY='pk_test_51RiTtaPJ2yFKupFRZZvT1LVsAEaravS1tA2SbPSJ3SMhZLlKCxCPiwKPzXn3ZbI5A7CBU7h9hk44EaE4ImUWZlfb00ao0KVUyB'
-STRIPE_SECRET_KEY='sk_test_51RiTtaPJ2yFKupFRxvNKUNwvGhgvLJSl4bTlpPTAhIihb5ufqOIUY9sbxN2WO65HDKpCuAd383U7vDwKZSbH7g6V00EtwLRz4I'
-STRIPE_WEBHOOK_SECRET='whsec_8cbff42ceea3b18d85931b52870ee3990a108fab21e7640872ab323e502b92b6'
+STRIPE_PUBLIC_KEY=config('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY=config('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET=config('STRIPE_WEBHOOK_SECRET')
 
 
 AUTHENTICATION_BACKENDS = [

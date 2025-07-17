@@ -18,7 +18,7 @@ from django.http import Http404
 
 def delete_item_view(request,item_id):
     order=get_order(request)
-    item=get_item(request,item_id,order)
+    item=get_item(request,item_id,order,by='item')
     item.delete()
     return redirect('cart')
 
@@ -44,12 +44,6 @@ def update_quantity_view(request,product_id):
         order_item.save()
         return JsonResponse({'status': 'ok', 'quantity': order_item.quantity})
     
-def checkout_view(request,order_id):
-    order=get_order(request,order_id=order_id)
-
-    if check_stock(request,order) == False : return redirect('cart')
-
-    order_items= order.items.all()
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
