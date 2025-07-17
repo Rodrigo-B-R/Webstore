@@ -17,6 +17,7 @@ whitenoise = "*"
 python-dotenv = "*"
 psycopg2 = "*"
 python-decouple = "*"
+gunicorn = "*"
 
 [dev-packages]
 
