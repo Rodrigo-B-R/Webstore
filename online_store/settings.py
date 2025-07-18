@@ -102,12 +102,6 @@ import os
 
 
 
-# Fetch variables
-USER = config("USER")
-PASSWORD = config("PASSWORD")
-HOST = config("HOST")
-PORT = config("PORT")
-DBNAME = config("DBNAME")
 
 
 
