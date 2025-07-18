@@ -231,6 +231,3 @@ ACCOUNT_FORMS = {
     'signup': 'usuarios.forms.CustomSignupForm',
     'login':'usuarios.forms.CustomLoginForm',
 }
-
-
-
