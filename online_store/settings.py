@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = config('DEBUG', default=False, cast=bool)  # En producción debe ser False
+DEBUG = config('DEBUG', default=True, cast=bool)  # En producción debe ser False
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())  # lista de hosts permitidos
 
