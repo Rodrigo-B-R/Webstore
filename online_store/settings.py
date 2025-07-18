@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY =  config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = []
 
 
 
@@ -108,15 +109,10 @@ PORT = config("PORT")
 DBNAME = config("DBNAME")
 
 
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DBNAME,
-        'USER': USER,
-        'PASSWORD': PASSWORD,
-        'HOST': HOST,  # ej. db.xxxxxxxxx.supabase.co
-        'PORT': PORT,
-    }
+    'default': dj_database_url.config(default=config('DATABASE_URL'))
 }
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
