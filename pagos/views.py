@@ -56,8 +56,8 @@ def create_stripe_session(items,order):
             payment_method_types=['card'],
             line_items=line_items,
             mode='payment',
-            success_url=f'http://127.0.0.1:8000/pagos/success?order_id={order.id}',
-            cancel_url=f'http://127.0.0.1:8000/cart/checkout/?order_id={order.id}',
+            success_url=f'webstore-xb8n.onrender.com/pagos/success?order_id={order.id}',
+            cancel_url=f'webstore-xb8n.onrender.com/cart/checkout/?order_id={order.id}',
             metadata={'order_id': order.id}
         )
     except Exception as e:
