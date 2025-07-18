@@ -32,6 +32,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS')
 
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -111,9 +112,25 @@ DBNAME = config("DBNAME")
 
 
 
+# DATABASES = {
+#     'default': dj_database_url.config(default=config('DATABASE_URL'))
+# }
+
+
+
 DATABASES = {
-    'default': dj_database_url.config(default=config('DATABASE_URL'))
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DBNAME'),
+        'USER': config('DBUSER'),
+        'PASSWORD': config('DBPASSWORD'),
+        'HOST': config('DBHOST'),  # aquí va: aws-0-us-east-2.pooler.supabase.com
+        'PORT': config('DBPORT', default='5432'),
+    }
 }
+DATABASES['default']['CONN_MAX_AGE'] = 0 
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
