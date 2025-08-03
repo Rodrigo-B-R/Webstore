@@ -12,7 +12,7 @@ from utils import link_guest_orders_to_user
 def handle_user_login(sender,user,request, **kwargs):
     customer, created = Customer.objects.get_or_create(
         user=user,
-        defaults={"name": user.get_full_name()}
+        defaults={"name": user.username}
     )
 
     link_guest_orders_to_user(user)
