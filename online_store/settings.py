@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = config('DEBUG', default=False, cast=bool)  # En producción debe ser False
+DEBUG = config('DEBUG', default=True, cast=bool)  # En producción debe ser False
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())  # lista de hosts permitidos
 
@@ -138,8 +138,12 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-ACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_LOGIN_METHODS = {'username'}
+
+
+ACCOUNT_AUTHENTICATION_METHOD = "email" 
+ACCOUNT_LOGIN_METHODS = {'email'}
+
+
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True

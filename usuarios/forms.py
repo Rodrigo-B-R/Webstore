@@ -16,11 +16,12 @@ class CustomSignupForm(SignupForm):
 
 
 class CustomLoginForm(LoginForm):
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class']='form-control'
-        print(self.fields.keys())
+        
 
 
 #Formulario de usuario
@@ -58,12 +59,7 @@ class ShippingAddressForm(ModelForm):
             field.widget.attrs.update({'class': 'form-control'})
 
 #Formulario custom de login para añadir estilos 
-class CustomLoginForm(AuthenticationForm):
-    
-    def __init__(self, request = ..., *args, **kwargs):
-        super().__init__(request, *args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs.update({'class':'form-control'})
+
 
 
 

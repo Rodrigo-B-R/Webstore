@@ -21,8 +21,12 @@ def get_order(request, order_id=None, is_complete=False):
         if is_complete:
             return get_object_or_404(Order, **filters)
         # Autocreación si no existe (carrito)
-        order, _ = Order.objects.get_or_create(**filters)
-        return order
+        orders = Order.objects.filter(**filters)
+        if orders.exists():
+            # Devuelve el más reciente si hay varios
+            return orders.latest('date_ordered')
+        else:
+            return Order.objects.create(**filters)
     else:
         # Orden de invitado
         if order_id:

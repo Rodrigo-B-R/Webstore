@@ -14,9 +14,6 @@ from .utils import check_shipping_addres
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-from django.shortcuts import get_object_or_404
-from usuarios.models import ShippingAddress  
-from carrito.models import GuestOrder,GuestOrderItem
 
 from .utils import get_order, get_order_by_id, update_order
 
